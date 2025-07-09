@@ -1,1 +1,2 @@
-# Final-Year-Project
+# Multi-Omics Machine Learning Model for Predicting Chemoresistance
+This project investigates the prediction of chemotherapy-resistant cancer cells using machine learning.  In order to create a strong model that can recognise important resistance signatures, the research will make use of multi-omics datasets, such as transcriptomic, proteomic, and genomic data.  The integrated strategy combines many biological data sources to improve forecasting accuracy.  An innovative algorithm will be created and put into use in a prototype system to show how it might advance individualised cancer treatment plans.
