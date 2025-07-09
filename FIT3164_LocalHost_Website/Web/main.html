@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DRUGRES: Drug-Cell Line Resistance Prediction Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('image_file/26713.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: #fff;
+      padding: 15px 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      box-sizing: border-box;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      font-family: Georgia;
+      color: rgba(0,0,0,0.7);
+    }
+
+    nav button {
+      margin-right: 15px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #f0e8f1ce;
+      color: rgba(0,0,0,0.7);
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      font-family: Georgia;
+    }
+
+    nav button img {
+      width: 20px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: rgba(0, 0, 0, 0.7);
+      text-align: center;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+      max-width: 850px;
+      width: 100%;
+      margin-top: 160px;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 850px;
+    }
+
+    .main-content {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      font-size: 20px;
+      font-family: Georgia;
+    }
+
+    .upload-section {
+      border: 2px dashed #bbb;
+      border-radius: 10px;
+      padding: 40px;
+      margin: 30px 0;
+      cursor: pointer;
+      background: #f9f9f9;
+      transition: background 0.3s ease;
+    }
+
+    .upload-section:hover {
+      background: #f1f1f1;
+    }
+
+    .upload-section label {
+      font-size: 16px;
+      color: #5d3b63;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .upload-section input {
+      display: none;
+    }
+
+    .file-info {
+      font-size: 14px;
+      color: #2c7a7b;
+      margin-top: 15px;
+    }
+
+    .btn {
+      background-color: #5d3b63;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .btn:hover {
+      background-color: #482a4d;
+    }
+
+    #loading_indicator {
+      margin-top: 15px;
+      color: #9b59b6;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 60%;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+
+    #search_button {
+      background-color: #5d3b63;
+      color: white;
+      margin-left: 10px;
+    }
+
+    #download_cancer {
+      background-color: #27ae60;
+      color: white;
+      display: none;
+      margin-top: 10px;
+    }
+
+    .styled-table {
+      border-collapse: collapse;
+      font-size: 14px;
+      width: 90%;
+      margin: 30px auto;
+      background-color: white;
+      color: black;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .styled-table th,
+    .styled-table td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    .styled-table th {
+      background-color: #5d3b63;
+      color: #fff;
+    }
+
+    .styled-table tbody tr:hover {
+      background-color: #f3f3f3;
+    }
+
+
+    #csv_preview {
+      margin: 60px auto;
+      width: 90%;
+    }
+
+    .filter-btn {
+      display: inline-block;
+      padding: 8px 14px;
+      margin: 5px 5px 0 0;
+      background-color: #ddd;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .filter-btn.active {
+      background-color: #5d3b63;
+      color: white;
+    }
+
+    .filter-search {
+      margin-top: 10px;
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .filter-checkboxes {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #fafafa;
+    }
+
+    #top_drugs_section {
+  display: none;
+  margin: 50px auto;
+  width: 95%;
+  max-width: 1090px;
+  text-align: center;
+}
+
+#top_drugs_section h3 {
+  color: #5d3b63;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.top-drug-chart {
+  background: white; /* already opaque, keep this */
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  height: auto;
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+
+.top-drug-chart canvas {
+  width: 100% ;
+  height: 300px ;
+}
+
+#no_chart_msg {
+  display: none;
+  color: #888;
+  font-style: italic;
+  font-size: 16px;
+  margin-top: 20px;
+}
+#top_drugs_container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+
+#top_drugs_container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.chart-card-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 1200px;
+  margin: 40px auto;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+
+
+.charts-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  width: 48%; /* For side-by-side charts */
+  min-width: 400px;
+}
+
+.chart-card canvas {
+  width: 100% !important;
+  height: 300px !important;
+}
+
+#no_chart_msg {
+  display: none;
+  color: #888;
+  font-style: italic;
+  font-size: 16px;
+  margin-top: 20px;
+}
+.chart-card {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 60px auto;
+  display: none;
+}
+
+.chart-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.chart-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  flex: 1 1 45%;
+  max-width: 45%;
+}
+
+.chart-wrapper.single {
+  flex: 1 1 94%;
+  max-width: 94%;
+}
+
+    .requirements-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .requirements-title {
+      color: #5d3b63;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-family: Georgia;
+      color: rgba(0,0,0,0.7);
+    }
+
+    .requirements-list {
+      margin: 15px 0;
+      padding-left: 20px;
+      font-family: Georgia;
+    }
+
+    .requirements-list label {
+      display: block;
+      margin: 8px 0;
+      cursor: pointer;
+      font-family: Georgia;
+    }
+
+    .requirements-list input[type="checkbox"],
+    .requirements-list input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    .requirements-group {
+      margin-bottom: 20px;
+      font-family: Georgia;
+    }
+
+
+
+</style>
+
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">Cancer Drug Response Predictor</div>
+    <nav>
+     <button onclick="window.location.href='introduction.html'">
+        <img src="image_file/introduction.png" alt="Intro">Introduction
+      </button>
+      <button onclick="window.location.href='main.html'">
+        <img src="image_file/predictive-analysis.png" alt="Prediction">Prediction
+      </button>
+      <button onclick="window.location.href='about.html'">
+        <img src="image_file/group.png" alt="About Us">About Us
+      </button>
+    </nav>
+  </header>
+
+   <div class="main-content">
+  <div class="container">
+    <h2>Upload Your CSV</h2>
+    <p>This tool predicts chemoresistance based on your uploaded multi-omics drug-cell line dataset.</p >
+
+    <div id="upload-section" class="upload-section" onclick="document.getElementById('file_upload_prediction').click()">
+      <span>📤 Click to upload your CSV file</span>
+      <input type="file" id="file_upload_prediction" accept=".csv">
+    </div>
+
+    <div id="loading_indicator"></div>
+    <div id="spinner" style="display: none;">
+      <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." style="height: 30px;">
+    </div>
+    <div id="file_info_prediction" class="file-info"></div>
+
+    <div id="filter_controls" style="display: none; margin-top: 30px;">
+      <h4>Select Cancer Types:</h4>
+      <div id="cancer_filter_checkboxes" class="filter-checkboxes"></div>
+      <button id="download_filtered" class="btn" style="display: none;">⬇️ Download Filtered Data</button>
+    </div>
+    </div>
+     </div>
+
+  <div id="requirements">
+      <div class="requirements-container">
+        <div class="requirements-group">
+          <div class="requirements-title">CSV Format Requirements</div>
+          <p>Please confirm your CSV includes <strong>exactly these column names</strong> (case-sensitive):</p>
+          <div class="requirements-list">
+            <label><input type="checkbox" class="req-check"> DRUG_ID</label>
+            <label><input type="checkbox" class="req-check"> DRUG_NAME</label>
+            <label><input type="checkbox" class="req-check"> COSMIC_ID</label>
+            <label><input type="checkbox" class="req-check"> CCLE_NAME</label>
+            <label><input type="checkbox" class="req-check"> CANCER_TYPE</label>
+            <label><input type="checkbox" class="req-check"> ISOSMILES</label>
+            <label><input type="checkbox" class="req-check"> Transcriptomics （19,221 Columns）</label>
+            <label><input type="checkbox" class="req-check"> Proteomics （214 Columns）</label>
+          </div>
+          <p style="text-align: center; margin-top: 15px;">
+            📁 <a href="sample/user_guide_sample_dataset.csv" download style="color: #5d3b63; font-weight: bold; text-decoration: underline;">
+              Download Sample CSV
+            </a>
+          </p>
+        </div>
+      </div>
+  </div>
+
+<section id="top_drugs_section" class="chart-card">
+  <h3>📊 Top 10 Sensitive Drugs by Cancer Type</h3>
+  <p style="color:#777; margin-bottom: 20px;">Lower LN IC50 values indicate higher sensitivity to the drug.</p >
+  <div id="top_drugs_container" class="chart-grid"></div>
+  <div id="no_chart_msg">No cancer types selected to display charts.</div>
+</section>
+
+
+
+<div id="csv_preview"></div>
+<script src="web.js"></script>
+</body>
+</html>
